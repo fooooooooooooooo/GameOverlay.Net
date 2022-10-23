@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
-
+using System.IO;
 using SharpDX;
 using SharpDX.Direct2D1;
 using SharpDX.DirectWrite;
@@ -2235,5 +2235,36 @@ namespace GameOverlay.Drawing
 		}
 
 		#endregion IDisposable Support
-	}
+
+    public Bitmap CreateBitmap(byte[] bytes, int width, int height, BitmapProperties properties) {
+      var renderTarget = GetRenderTarget();
+      
+      properties.DpiX = renderTarget.DotsPerInch.Width;
+      properties.DpiY = renderTarget.DotsPerInch.Height;
+
+      var bm = new Bitmap(renderTarget, new Size2(width, height), properties);
+
+      bm.CopyFromMemory(bytes, width * properties.PixelFormat.Format.SizeOfInBytes());
+
+      return bm;
+    }
+
+    public void DrawBitmap(Bitmap bitmap, int x, int y) {
+      GetRenderTarget()
+        .DrawBitmap(
+          bitmap,
+          new RawRectangleF(
+            x,
+            y,
+            bitmap.Size.Width + x,
+            bitmap.Size
+              .Height +
+            y
+          ),
+          1,
+          BitmapInterpolationMode
+            .Linear
+        );
+    }
+  }
 }
